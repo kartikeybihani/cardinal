@@ -150,7 +150,12 @@ export function convertCardinalToStatement(cardinalData: CardinalMarkdownRespons
   console.log('Pages count:', cardinalData.pages?.length || 0);
   
   // Extract all tables from all pages
-  const allTables: any[] = [];
+  interface TableData {
+    pageIndex: number;
+    tableIndex: number;
+    data: unknown;
+  }
+  const allTables: TableData[] = [];
   if (cardinalData.pages) {
     cardinalData.pages.forEach((page, pageIndex) => {
       console.log(`Page ${pageIndex} details:`, {
@@ -176,20 +181,43 @@ export function convertCardinalToStatement(cardinalData: CardinalMarkdownRespons
   console.log('=== END NORMALIZER INPUT ===');
   
   // Parse the actual Cardinal data
-  const positions: any[] = [];
-  const transactions: any[] = [];
-  const fees: any[] = [];
-  let accountInfo = {
+  interface Position {
+    symbol: string;
+    description: string;
+    quantity: string;
+    price: string;
+    value: string;
+    assetClass: string;
+  }
+  interface Transaction {
+    date: string;
+    type: string;
+    symbol: string;
+    quantity: string;
+    price: string;
+    amount: string;
+    fee: string;
+  }
+  interface Fee {
+    date: string;
+    label: string;
+    amount: string;
+    category: string;
+  }
+  const positions: Position[] = [];
+  const transactions: Transaction[] = [];
+  const fees: Fee[] = [];
+  const accountInfo = {
     accountNumber: "Unknown",
     periodStart: "Unknown",
     periodEnd: "Unknown",
     endingValue: 0,
     totalFees: 0
   };
-  
+    
   // Extract data from tables
   allTables.forEach((tableData, index) => {
-    const table = tableData.data;
+    const table = tableData.data as Record<string, unknown>;
     
     // Try to extract structured data from the table object
     if (table && typeof table === 'object') {
@@ -198,11 +226,13 @@ export function convertCardinalToStatement(cardinalData: CardinalMarkdownRespons
       // Look for different types of financial data
       // This is a basic parser - you'll need to adapt based on actual Cardinal table structure
       if (table.rows && Array.isArray(table.rows)) {
-        table.rows.forEach((row: any, rowIndex: number) => {
-          if (row.cells && Array.isArray(row.cells)) {
-            const cellTexts = row.cells.map((cell: unknown) => 
-              typeof cell === 'string' ? cell : (cell as any)?.text || (cell as any)?.value || ''
-            );
+        table.rows.forEach((row: unknown) => {
+          if ((row as Record<string, unknown>)?.cells && Array.isArray((row as Record<string, unknown>).cells)) {
+            const cellTexts: string[] = ((row as Record<string, unknown>).cells as unknown[]).map((cell: unknown) => {
+              if (typeof cell === 'string') return cell;
+              const cellObj = cell as Record<string, unknown>;
+              return String(cellObj?.text || cellObj?.value || '');
+            });
             
             // Basic heuristics to classify rows
             const rowText = cellTexts.join(' ').toLowerCase();
@@ -225,8 +255,10 @@ export function convertCardinalToStatement(cardinalData: CardinalMarkdownRespons
       }
       
       // Look for account information in table metadata or headers
-      if (table.title || table.caption) {
-        const titleText = (table.title || table.caption || '').toLowerCase();
+      const title = table.title as string | undefined;
+      const caption = table.caption as string | undefined;
+      if (title || caption) {
+        const titleText = String(title || caption || '').toLowerCase();
         if (titleText.includes('account')) {
           // Try to extract account number
           const accountMatch = titleText.match(/account[:\s]*(\d+)/i);
@@ -261,7 +293,7 @@ export function convertCardinalToStatement(cardinalData: CardinalMarkdownRespons
       amount: "$0.00",
       fee: "$0.00"
     });
-  }
+  } 
   
   return {
     header: accountInfo,
