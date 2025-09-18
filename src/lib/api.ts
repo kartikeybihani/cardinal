@@ -39,7 +39,9 @@ export async function uploadFiles(files: File[]): Promise<CardinalMarkdownRespon
     throw new Error('Failed to upload files');
   }
 
-  return response.json();
+  const data: CardinalMarkdownResponse = await response.json();
+  // Return as array since frontend expects array
+  return [data];
 }
 
 // Upload from URL - now returns Cardinal markdown response

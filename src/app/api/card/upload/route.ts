@@ -24,13 +24,20 @@ export async function POST(req: NextRequest) {
     form.append("densePdfDetect", "true");
     form.append("markdown", "false");
 
+    console.log('Making request to Cardinal API:', ENDPOINTS.MARKDOWN);
+    console.log('Headers:', headers);
+    
     const res = await fetch(ENDPOINTS.MARKDOWN, { 
       method: "POST", 
       headers, 
       body: form 
     });
     
+    console.log('Cardinal API response status:', res.status, res.statusText);
+    
     if (!res.ok) {
+      const errorText = await res.text();
+      console.error('Cardinal API error response:', errorText);
       throw new Error(`Cardinal API error: ${res.status} ${res.statusText}`);
     }
     
