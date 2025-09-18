@@ -154,7 +154,10 @@ export function convertCardinalToStatement(cardinalData: CardinalMarkdownRespons
         pageIndex: page.pageIndex,
         textPreview: page.text?.substring(0, 100) + '...',
         tablesCount: page.processed_tables?.length || 0,
-        firstTableHTML: page.processed_tables?.[0]?.substring(0, 300) + '...'
+        firstTableType: typeof page.processed_tables?.[0],
+        firstTableHTML: typeof page.processed_tables?.[0] === 'string' 
+          ? page.processed_tables[0].substring(0, 300) + '...'
+          : page.processed_tables?.[0] ? JSON.stringify(page.processed_tables[0]).substring(0, 300) + '...' : 'No table data'
       });
     });
   }

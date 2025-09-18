@@ -48,7 +48,6 @@ export async function POST(req: NextRequest) {
       status: json.status,
       message: json.message,
       pagesCount: json.pages?.length || 0,
-      fullResponse: json, // Log the complete response for debugging
       pages: json.pages?.map((page) => ({
         pageIndex: page.pageIndex,
         textLength: page.text?.length || 0,
