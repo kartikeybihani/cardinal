@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     
     // Retry logic for service unavailable errors
     let res: Response;
-    let retries = 3;
+    const retries = 3;
     
     for (let attempt = 1; attempt <= retries; attempt++) {
       res = await fetch(ENDPOINTS.MARKDOWN, { 
