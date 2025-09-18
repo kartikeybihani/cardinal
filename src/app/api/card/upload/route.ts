@@ -44,18 +44,23 @@ export async function POST(req: NextRequest) {
     const json: CardinalMarkdownResponse = await res.json();
     
     // Log the complete Cardinal API response
-    logVercel('Cardinal API response received', {
+    logVercel('\nCardinal API response received', {
       status: json.status,
       message: json.message,
       pagesCount: json.pages?.length || 0,
+      fullResponse: json, // Log the complete response for debugging
       pages: json.pages?.map((page) => ({
         pageIndex: page.pageIndex,
         textLength: page.text?.length || 0,
         tablesCount: page.processed_tables?.length || 0,
-        firstTablePreview: page.processed_tables?.[0]?.substring(0, 200) + '...' || 'No tables'
+        firstTableType: typeof page.processed_tables?.[0],
+        firstTablePreview: typeof page.processed_tables?.[0] === 'string' 
+          ? page.processed_tables[0].substring(0, 200) + '...' 
+          : page.processed_tables?.[0] ? 'Table data (non-string)' : 'No tables'
       }))
     });
-    
+    console.log('===============================================');
+
     return NextResponse.json(json);
   } catch (error) {
     logError('Upload error occurred', error);
