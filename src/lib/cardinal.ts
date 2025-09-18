@@ -49,3 +49,43 @@ export interface NormalizedData {
   transactions: TableRow[];
   fees: TableRow[];
 }
+
+// Frontend data structure for display
+export interface StatementData {
+  header: {
+    accountNumber: string;
+    periodStart: string;
+    periodEnd: string;
+    endingValue: number;
+    totalFees: number;
+  };
+  positions: Array<{
+    symbol: string;
+    description: string;
+    quantity: string;
+    price: string;
+    value: string;
+    assetClass: string;
+  }>;
+  transactions: Array<{
+    date: string;
+    type: string;
+    symbol: string;
+    quantity: string;
+    price: string;
+    amount: string;
+    fee: string;
+  }>;
+  fees: Array<{
+    date: string;
+    label: string;
+    amount: string;
+    category: string;
+  }>;
+  provenance: {
+    pageIndex: number;
+    tableIndex: number;
+    rowIndex: number;
+    html: string;
+  };
+}

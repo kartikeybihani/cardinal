@@ -1,4 +1,4 @@
-import { CardinalMarkdownResponse, NormalizedData, TableRow } from './cardinal';
+import { CardinalMarkdownResponse, NormalizedData, TableRow, StatementData } from './cardinal';
 
 // Lightweight HTML parser for table extraction
 function parseHTMLTable(html: string): { headers: string[], rows: string[][] } {
@@ -113,7 +113,7 @@ export function normalizeCardinalData(response: CardinalMarkdownResponse): Norma
 }
 
 // CSV export utilities
-export function exportToCSV(data: TableRow[], filename: string): string {
+export function exportToCSV(data: TableRow[]): string {
   if (data.length === 0) return '';
   
   const headers = Object.keys(data[0].data);
@@ -135,7 +135,37 @@ export function exportToCSV(data: TableRow[], filename: string): string {
 }
 
 // Generate download URL for CSV
-export function generateCSVDownload(csvContent: string, filename: string): string {
+export function generateCSVDownload(csvContent: string): string {
   const blob = new Blob([csvContent], { type: 'text/csv' });
   return URL.createObjectURL(blob);
+}
+
+// Convert Cardinal response to frontend format
+export function convertCardinalToStatement(cardinalData: CardinalMarkdownResponse): StatementData {
+  // For now, return mock data structure - in production, you'd parse the Cardinal response
+  return {
+    header: {
+      accountNumber: "****1234",
+      periodStart: "2024-01-01",
+      periodEnd: "2024-01-31",
+      endingValue: 125430.50,
+      totalFees: 45.20
+    },
+    positions: [
+      { symbol: "AAPL", description: "Apple Inc.", quantity: "100", price: "$150.25", value: "$15,025.00", assetClass: "Equity" },
+      { symbol: "MSFT", description: "Microsoft Corp.", quantity: "50", price: "$300.10", value: "$15,005.00", assetClass: "Equity" }
+    ],
+    transactions: [
+      { date: "2024-01-15", type: "Buy", symbol: "AAPL", quantity: "10", price: "$150.00", amount: "$1,500.00", fee: "$1.00" }
+    ],
+    fees: [
+      { date: "2024-01-31", label: "Account Maintenance Fee", amount: "$10.00", category: "Account" }
+    ],
+    provenance: {
+      pageIndex: 2,
+      tableIndex: 1,
+      rowIndex: 0,
+      html: "<table><tr><td>AAPL</td><td>Apple Inc.</td><td>100</td><td>$150.25</td><td>$15,025.00</td></tr></table>"
+    }
+  };
 }

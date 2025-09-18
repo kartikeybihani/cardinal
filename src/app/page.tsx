@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { uploadFiles, uploadFromUrl } from "@/lib/api";
+import { uploadFiles, uploadFromUrl, type StatementData } from "@/lib/api";
+import { convertCardinalToStatement } from "@/lib/normalizer";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"upload" | "results">("upload");
@@ -14,7 +15,7 @@ export default function Home() {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [error, setError] = useState<string>("");
-  const [statementData, setStatementData] = useState<any[]>([]);
+  const [statementData, setStatementData] = useState<StatementData[]>([]);
   const [selectedStatement, setSelectedStatement] = useState<number>(0);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -46,7 +47,7 @@ export default function Home() {
     const validFiles: File[] = [];
     const errors: string[] = [];
 
-    files.forEach((file, index) => {
+    files.forEach((file) => {
       // Validate file type
       if (file.type !== "application/pdf") {
         errors.push(`${file.name}: Not a PDF file`);
@@ -101,9 +102,11 @@ export default function Home() {
 
       try {
         const data = await uploadFromUrl(fileUrl.trim());
-        setStatementData([data]);
+        // Convert Cardinal response to frontend format
+        const convertedData = convertCardinalToStatement(data);
+        setStatementData([convertedData]);
         setActiveTab("results");
-      } catch (err) {
+      } catch {
         setError("Failed to process the URL. Please try again.");
       } finally {
         setIsProcessing(false);
@@ -119,9 +122,11 @@ export default function Home() {
 
     try {
       const data = await uploadFiles(uploadedFiles);
-      setStatementData(data);
+      // Convert Cardinal responses to frontend format
+      const convertedData = data.map(convertCardinalToStatement);
+      setStatementData(convertedData);
       setActiveTab("results");
-    } catch (err) {
+    } catch {
       setError("Failed to process the files. Please try again.");
     } finally {
       setIsProcessing(false);
@@ -470,7 +475,11 @@ export default function Home() {
                     ].map((tab) => (
                       <button
                         key={tab.key}
-                        onClick={() => setResultsTab(tab.key as any)}
+                        onClick={() =>
+                          setResultsTab(
+                            tab.key as "summary" | "tables" | "provenance"
+                          )
+                        }
                         className={`py-4 px-1 border-b-2 transition-colors ${
                           resultsTab === tab.key
                             ? "border-blue-500 text-blue-600"
@@ -603,7 +612,10 @@ export default function Home() {
                             </thead>
                             <tbody className="divide-y divide-gray-200">
                               {statementData[selectedStatement].positions.map(
-                                (row: any, index: number) => (
+                                (
+                                  row: Record<string, unknown>,
+                                  index: number
+                                ) => (
                                   <tr
                                     key={index}
                                     className={`hover:bg-gray-100 cursor-pointer transition-colors ${
@@ -616,22 +628,22 @@ export default function Home() {
                                     }
                                   >
                                     <td className="px-4 py-3 text-sm text-black font-medium">
-                                      {row.symbol}
+                                      {String(row.symbol)}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-gray-600">
-                                      {row.description}
+                                      {String(row.description)}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-black">
-                                      {row.quantity}
+                                      {String(row.quantity)}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-black">
-                                      {row.price}
+                                      {String(row.price)}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-black font-medium">
-                                      {row.value}
+                                      {String(row.value)}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-gray-600">
-                                      {row.assetClass}
+                                      {String(row.assetClass)}
                                     </td>
                                   </tr>
                                 )
@@ -655,11 +667,12 @@ export default function Home() {
                           {`symbol,description,quantity,price,value,asset_class
 ${statementData[selectedStatement].positions
   .map(
-    (row: any) =>
-      `${row.symbol},${row.description},${row.quantity},${row.price.replace(
-        "$",
-        ""
-      )},${row.value.replace("$", "").replace(",", "")},${row.assetClass}`
+    (row: Record<string, unknown>) =>
+      `${String(row.symbol)},${String(row.description)},${String(
+        row.quantity
+      )},${String(row.price).replace("$", "")},${String(row.value)
+        .replace("$", "")
+        .replace(",", "")},${String(row.assetClass)}`
   )
   .join("\n")}`}
                         </pre>
@@ -747,32 +760,37 @@ ${statementData[selectedStatement].positions
                                 <tbody className="divide-y divide-gray-200">
                                   {statementData[
                                     selectedStatement
-                                  ].positions.map((row: any, index: number) => (
-                                    <tr
-                                      key={index}
-                                      className={
-                                        index === selectedRow
-                                          ? "bg-blue-50"
-                                          : ""
-                                      }
-                                    >
-                                      <td className="px-3 py-2 text-black font-medium">
-                                        {row.symbol}
-                                      </td>
-                                      <td className="px-3 py-2 text-gray-600">
-                                        {row.description}
-                                      </td>
-                                      <td className="px-3 py-2 text-black">
-                                        {row.quantity}
-                                      </td>
-                                      <td className="px-3 py-2 text-black">
-                                        {row.price}
-                                      </td>
-                                      <td className="px-3 py-2 text-black font-medium">
-                                        {row.value}
-                                      </td>
-                                    </tr>
-                                  ))}
+                                  ].positions.map(
+                                    (
+                                      row: Record<string, unknown>,
+                                      index: number
+                                    ) => (
+                                      <tr
+                                        key={index}
+                                        className={
+                                          index === selectedRow
+                                            ? "bg-blue-50"
+                                            : ""
+                                        }
+                                      >
+                                        <td className="px-3 py-2 text-black font-medium">
+                                          {String(row.symbol)}
+                                        </td>
+                                        <td className="px-3 py-2 text-gray-600">
+                                          {String(row.description)}
+                                        </td>
+                                        <td className="px-3 py-2 text-black">
+                                          {String(row.quantity)}
+                                        </td>
+                                        <td className="px-3 py-2 text-black">
+                                          {String(row.price)}
+                                        </td>
+                                        <td className="px-3 py-2 text-black font-medium">
+                                          {String(row.value)}
+                                        </td>
+                                      </tr>
+                                    )
+                                  )}
                                 </tbody>
                               </table>
                             </div>

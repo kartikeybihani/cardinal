@@ -1,12 +1,12 @@
 // API helper functions for Cardinal
-import type { CardinalMarkdownResponse, CardinalExtractResponse, CardinalCompareResponse, NormalizedData, TableRow } from './cardinal';
+import type { CardinalMarkdownResponse, CardinalExtractResponse, CardinalCompareResponse, NormalizedData, TableRow, StatementData } from './cardinal';
 
 const API_BASE = process.env.NODE_ENV === 'production' 
   ? 'https://cardinal-three.vercel.app' 
   : '';
 
 // Re-export types from cardinal.ts for convenience
-export type { CardinalMarkdownResponse, CardinalExtractResponse, CardinalCompareResponse, NormalizedData, TableRow };
+export type { CardinalMarkdownResponse, CardinalExtractResponse, CardinalCompareResponse, NormalizedData, TableRow, StatementData };
 
 // Legacy interfaces for backward compatibility
 export interface ExtractResponse {
