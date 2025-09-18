@@ -122,11 +122,26 @@ export default function Home() {
 
     try {
       const data = await uploadFiles(uploadedFiles);
+
+      // Log the received data from API
+      console.log("=== FRONTEND RECEIVED DATA ===");
+      console.log("Data type:", typeof data);
+      console.log("Data is array:", Array.isArray(data));
+      console.log("Data length:", data?.length || 0);
+      console.log("Full data:", data);
+      console.log("=== END FRONTEND DATA ===");
+
       // Convert Cardinal responses to frontend format
       const convertedData = data.map(convertCardinalToStatement);
+
+      console.log("=== CONVERTED DATA ===");
+      console.log("Converted data:", convertedData);
+      console.log("=== END CONVERTED DATA ===");
+
       setStatementData(convertedData);
       setActiveTab("results");
-    } catch {
+    } catch (error) {
+      console.error("Frontend processing error:", error);
       setError("Failed to process the files. Please try again.");
     } finally {
       setIsProcessing(false);

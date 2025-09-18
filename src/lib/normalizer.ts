@@ -142,6 +142,23 @@ export function generateCSVDownload(csvContent: string): string {
 
 // Convert Cardinal response to frontend format
 export function convertCardinalToStatement(cardinalData: CardinalMarkdownResponse): StatementData {
+  // Log the Cardinal data being processed
+  console.log('=== NORMALIZER INPUT ===');
+  console.log('Cardinal data received:', cardinalData);
+  console.log('Status:', cardinalData.status);
+  console.log('Pages count:', cardinalData.pages?.length || 0);
+  if (cardinalData.pages) {
+    cardinalData.pages.forEach((page, index) => {
+      console.log(`Page ${index} details:`, {
+        pageIndex: page.pageIndex,
+        textPreview: page.text?.substring(0, 100) + '...',
+        tablesCount: page.processed_tables?.length || 0,
+        firstTableHTML: page.processed_tables?.[0]?.substring(0, 300) + '...'
+      });
+    });
+  }
+  console.log('=== END NORMALIZER INPUT ===');
+  
   // For now, return mock data structure - in production, you'd parse the Cardinal response
   return {
     header: {
