@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 // Logger utility for both local development and Vercel production
-export function log(message: string, data?: any) {
+export function log(message: string, data?: unknown) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${message}`;
   
@@ -10,7 +11,7 @@ export function log(message: string, data?: any) {
   }
 }
 
-export function logError(message: string, error?: any) {
+export function logError(message: string, error?: unknown) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ERROR: ${message}`;
   
@@ -22,7 +23,7 @@ export function logError(message: string, error?: any) {
 }
 
 // For Vercel, also try to use their logging if available
-export function logVercel(message: string, data?: any) {
+export function logVercel(message: string, data?: unknown) {
   // This will work in Vercel's serverless environment
   log(message, data);
   

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { CardinalMarkdownResponse, NormalizedData, TableRow, StatementData } from './cardinal';
 
 // Lightweight HTML parser for table extraction

@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       status: json.status,
       message: json.message,
       pagesCount: json.pages?.length || 0,
-      pages: json.pages?.map((page, index) => ({
+      pages: json.pages?.map((page) => ({
         pageIndex: page.pageIndex,
         textLength: page.text?.length || 0,
         tablesCount: page.processed_tables?.length || 0,

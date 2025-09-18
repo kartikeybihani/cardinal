@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable no-console */
 
 import { useState } from "react";
 import { uploadFiles, uploadFromUrl, type StatementData } from "@/lib/api";
