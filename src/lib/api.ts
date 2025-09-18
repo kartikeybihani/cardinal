@@ -3,7 +3,7 @@ import type { CardinalMarkdownResponse, CardinalExtractResponse, CardinalCompare
 
 const API_BASE = process.env.NODE_ENV === 'production' 
   ? 'https://cardinal-three.vercel.app' 
-  : '';
+  : 'http://localhost:3000';
 
 // Re-export types from cardinal.ts for convenience
 export type { CardinalMarkdownResponse, CardinalExtractResponse, CardinalCompareResponse, NormalizedData, TableRow, StatementData };
@@ -26,8 +26,8 @@ export interface CompareResponse {
 // Upload files or URL - now returns Cardinal markdown response
 export async function uploadFiles(files: File[]): Promise<CardinalMarkdownResponse[]> {
   const formData = new FormData();
-  files.forEach((file, index) => {
-    formData.append(`file_${index}`, file);
+  files.forEach((file) => {
+    formData.append("file", file);
   });
 
   const response = await fetch(`${API_BASE}/api/card/upload`, {
